@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		C00B6EA124575D69001EA4E3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C00B6EA024575D69001EA4E3 /* main.cpp */; };
+		C00B6EA924576081001EA4E3 /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C00B6EA724576081001EA4E3 /* common.cpp */; };
+		C00B6EAC24576097001EA4E3 /* server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C00B6EAA24576097001EA4E3 /* server.cpp */; };
+		C00B6EAF245760A7001EA4E3 /* client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C00B6EAD245760A7001EA4E3 /* client.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,12 @@
 /* Begin PBXFileReference section */
 		C00B6E9D24575D69001EA4E3 /* chat */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chat; sourceTree = BUILT_PRODUCTS_DIR; };
 		C00B6EA024575D69001EA4E3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C00B6EA724576081001EA4E3 /* common.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = common.cpp; sourceTree = "<group>"; };
+		C00B6EA824576081001EA4E3 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		C00B6EAA24576097001EA4E3 /* server.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = server.cpp; sourceTree = "<group>"; };
+		C00B6EAB24576097001EA4E3 /* server.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = server.h; sourceTree = "<group>"; };
+		C00B6EAD245760A7001EA4E3 /* client.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = client.cpp; sourceTree = "<group>"; };
+		C00B6EAE245760A7001EA4E3 /* client.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = client.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +67,12 @@
 			isa = PBXGroup;
 			children = (
 				C00B6EA024575D69001EA4E3 /* main.cpp */,
+				C00B6EAA24576097001EA4E3 /* server.cpp */,
+				C00B6EAD245760A7001EA4E3 /* client.cpp */,
+				C00B6EAE245760A7001EA4E3 /* client.h */,
+				C00B6EAB24576097001EA4E3 /* server.h */,
+				C00B6EA724576081001EA4E3 /* common.cpp */,
+				C00B6EA824576081001EA4E3 /* common.h */,
 			);
 			path = chat;
 			sourceTree = "<group>";
@@ -119,6 +134,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00B6EAC24576097001EA4E3 /* server.cpp in Sources */,
+				C00B6EA924576081001EA4E3 /* common.cpp in Sources */,
+				C00B6EAF245760A7001EA4E3 /* client.cpp in Sources */,
 				C00B6EA124575D69001EA4E3 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

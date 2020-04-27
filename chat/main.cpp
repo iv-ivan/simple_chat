@@ -7,9 +7,26 @@
 //
 
 #include <iostream>
+#include "server.h"
+#include "client.h"
+
+using namespace std;
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    if (argc != 2) {
+        cerr << "mode<server, client> port";
+        return 1;
+    }
+
+    size_t port = std::stoi(argv[1]);
+
+    if (strcmp(argv[0], "server") == 0) {
+        TServer s(port);
+        s.Run();
+    } else if (strcmp(argv[0], "client") == 0) {
+        TClient c(port);
+        c.Run();
+    }
+
     return 0;
 }
