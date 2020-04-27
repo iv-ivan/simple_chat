@@ -7,24 +7,35 @@
 //
 
 #include <iostream>
+#include <string>
 #include "server.h"
 #include "client.h"
 
 using namespace std;
 
 int main(int argc, const char * argv[]) {
-    if (argc != 2) {
-        cerr << "mode<server, client> port";
+    if (argc < 3) {
+        cerr << "mode<server, client> options";
         return 1;
     }
 
-    size_t port = std::stoi(argv[1]);
+    const size_t port = std::stoi(argv[2]);
 
-    if (strcmp(argv[0], "server") == 0) {
+    if (strcmp(argv[1], "server") == 0) {
+        if (argc < 3) {
+            cerr << "server port";
+            return 1;
+        }
         TServer s(port);
         s.Run();
-    } else if (strcmp(argv[0], "client") == 0) {
-        TClient c(port);
+    } else if (strcmp(argv[1], "client") == 0) {
+        if (argc < 5) {
+            cerr << "client port server_port client_name";
+            return 1;
+        }
+        const size_t serverPort = std::stoi(argv[3]);
+        const string myName = argv[4];
+        TClient c(port, serverPort, myName);
         c.Run();
     }
 
