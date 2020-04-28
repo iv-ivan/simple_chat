@@ -27,7 +27,15 @@ void TServer::Run() {
             continue;
         }
 
-        ProcessMessage(sock);
+        int optionValue = 1;
+        if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void*)&optionValue, sizeof(optionValue)) < 0) {
+            cerr << "Bad accept " << endl;
+            perror("No SigPipe : ");
+            continue;
+        }
+
+        const std::lock_guard<std::mutex> lock(ClientsMutex);
+        ClientConnections[sock] = std::async(std::launch::async, &TServer::ProcessMessage, this, sock);
     }
 }
 
@@ -36,75 +44,79 @@ void TServer::ProcessMessage(int sock) {
     char buf[N];
     string message;
     while (true) {
-        size_t bytes_read = recv(sock, buf, N, 0);
-        if (bytes_read <= 0) {
-            break;
+        long bytesSize = recv(sock, buf, N, 0);
+        if (bytesSize <= 0) {
+            return;
         }
-        message.append(buf);
+        string tmpMessage = string(buf);
+        while (tmpMessage.find("$") != string::npos) {
+            message += tmpMessage.substr(0, tmpMessage.find("$"));
+            tmpMessage = tmpMessage.substr(tmpMessage.find("$") + 1, tmpMessage.size() - tmpMessage.find("$") - 1);
+        
+            ProcessCommand(message, sock);
+            message.clear();
+        }
+        message += tmpMessage;
+
+        memset(&buf[0], 0, N);
     }
-    
-    //cout << "Message:" << message << endl;
-    string_view other = message;
+}
+
+void TServer::ProcessCommand(const string& commandMessage, int sock) {
+    string_view other = commandMessage;
     string_view command = nextTok(other, ' ');
 
     if (command == "connect") {
         string_view name = nextTok(other, ' ');
-        size_t port = stoi(string(other));
-        RegisterClient(string(name), port);
+        RegisterClient(string(name), sock);
         FetchNewMessages(string(name));
     } else if (command == "send") {
         string_view senderName = nextTok(other, ' ');
         string_view receiverName = nextTok(other, ' ');
         SendMessage(string(senderName), string(receiverName), string(other));
     } else if (command == "ok") {
+        return;
     } else {
-        cerr << "bad message:" << message << "; command:" << command << ";" << endl;
-        shutdown(sock, 2);
+        cerr << "bad message:" << commandMessage << "; command:" << command << ";" << endl;
         return;
     }
 
-    send(sock, string("ok").c_str(), 3, 0);
-    shutdown(sock, 2);
+    send(sock, string("ok$").data(), 3, 0);
 }
 
-void TServer::RegisterClient(const std::string& name, size_t port) {
-    Clients[name] = port;
+void TServer::RegisterClient(const std::string& name, int sock) {
+    const std::lock_guard<std::mutex> lock(ClientsMutex);
+    if (Clients.count(name) > 0) {
+        ClientConnections[Clients[name]].wait();
+        ClientConnections.erase(Clients[name]);
+    }
+    Clients[name] = sock;
 }
 
 void TServer::SendMessage(const std::string& senderName, const std::string& receiverName, const std::string& message) {
+    const std::lock_guard<std::mutex> lock(ClientsMutex);
     if (Clients.count(receiverName) == 0) {
         return;
     }
     
-    int sendSock = createSocket(Clients[receiverName], false);
-    if (sendSock == -1) {
-        cerr << "Can't send to " << receiverName << ", port:" << Clients[receiverName] << endl;
-        MessageQueue[receiverName].push_back(message);
-        return;
+    string msgString = "message " + senderName + ": " + message + "$";
+
+    long bytesSize = send(Clients[receiverName], msgString.data(), msgString.size(), 0);
+    if (bytesSize <= 0) {
+        MessageQueue[receiverName].push_back(senderName + ": " + message);
     }
-    //cout << "Sending to " << receiverName << ", port:" << Clients[receiverName] << endl;
-    
-    string msgString = "message " + senderName + ": " + message;
-    send(sendSock, msgString.data(), msgString.size() + 1, 0);
-    shutdown(sendSock, 2);
 }
 
 void TServer::FetchNewMessages(const std::string& name) {
+    const std::lock_guard<std::mutex> lock(ClientsMutex);
     if (MessageQueue.count(name) == 0) {
         return;
     }
 
-    int sendSock = createSocket(Clients[name], false);
-    if (sendSock == -1) {
-        cerr << "Can't send to " << name << ", port:" << Clients[name] << endl;
-        return;
-    }
-    //cout << "Sending to " << name << ", port:" << Clients[name] << endl;
-    
     string historyString = "history ";
     for (const auto& message : MessageQueue[name]) {
         historyString += message + "\n";
     }
-    send(sendSock, historyString.data(), historyString.size() + 1, 0);
-    shutdown(sendSock, 2);
+    historyString += "$";
+    send(Clients[name], historyString.data(), historyString.size(), 0);
 }

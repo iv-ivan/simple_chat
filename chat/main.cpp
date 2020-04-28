@@ -29,13 +29,12 @@ int main(int argc, const char * argv[]) {
         TServer s(port);
         s.Run();
     } else if (strcmp(argv[1], "client") == 0) {
-        if (argc < 5) {
-            cerr << "client port server_port client_name";
+        if (argc < 4) {
+            cerr << "client server_port client_name";
             return 1;
         }
-        const size_t serverPort = std::stoi(argv[3]);
-        const string myName = argv[4];
-        TClient c(port, serverPort, myName);
+        const string myName = argv[3];
+        TClient c(port, myName);
         c.Run();
     }
 

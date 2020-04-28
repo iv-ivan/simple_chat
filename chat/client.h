@@ -14,20 +14,19 @@
 
 class TClient {
 public:
-    TClient(size_t port, size_t serverPort, std::string clientName)
-        : Port(port)
-        , ServerPort(serverPort)
+    TClient(size_t serverPort, std::string clientName)
+        : ServerPort(serverPort)
         , Name(clientName)
     {}
     
     void Run();
 private:
     void ProcessMessage(int sock);
-    void SendingLoop();
+    void ProcessCommand(const std::string& commandMessage, int sock);
+    void SendingLoop(int sock);
     
     void Print(const std::string& txt);
 private:
-    size_t Port;
     size_t ServerPort;
     std::string Name;
 };
